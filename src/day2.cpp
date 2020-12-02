@@ -15,22 +15,17 @@ struct Input {
     unsigned long high;
 };
 
-std::optional<Input> from_line(const std::string& line) {
+Input from_line(const std::string& line) {
     Input input;
     size_t parsed;
     std::string line_copy(line);
 
-    try {
-        input.low = std::stoul(line_copy, &parsed);
-        line_copy.erase(0, parsed + 1); // Remove min + '-'
-        input.high = std::stoul(line_copy, &parsed);
-        input.letter = line_copy[parsed + 1]; // Skip max + ' '
-        input.password = std::string(line_copy.begin() + parsed + 4, line_copy.end());  // Skip max + ' ' + letter + ": "
-    }
-    catch (std::invalid_argument) {
-        std::cerr << "Failed to parse input line: " << line << std::endl;
-        return std::nullopt;
-    }
+    input.low = std::stoul(line_copy, &parsed);
+    line_copy.erase(0, parsed + 1); // Remove min + '-'
+    input.high = std::stoul(line_copy, &parsed);
+    input.letter = line_copy[parsed + 1]; // Skip max + ' '
+    input.password = std::string(line_copy.begin() + parsed + 4, line_copy.end());  // Skip max + ' ' + letter + ": "
+
     return input;
 }
 
@@ -57,7 +52,7 @@ int main(int argc, char *argv[]) {
         parsed.part = raw_input.part;
 
         std::transform(raw_input.data.begin(), raw_input.data.end(), std::back_inserter(parsed.data),
-                       [](const std::string& s) { return *from_line(s); });
+                       [](const std::string& s) { return from_line(s); });
 
         return parsed;
     };
