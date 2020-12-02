@@ -2,7 +2,7 @@
 // Created by kipper on 2020-11-30.
 //
 
-#include "cli.h"
+#include "common/cli.h"
 
 #include <algorithm>
 #include <numeric>
