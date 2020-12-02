@@ -42,7 +42,7 @@ bool solve_impl(const std::vector<int>& input, std::vector<int>& results, size_t
 
 int solve_puzzle(const CLIInput<std::vector<int>>& input) {
 
-    const size_t count = input.part_2 ? 3 : 2;
+    const size_t count = input.part == Part::ONE ? 2 : 3;
     const size_t sum = 2020;
 
     std::vector<int> sorted(input.data);
@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
         auto input = parse_input_file_lines(argc, argv);
 
         auto numeric_input = CLIInput<std::vector<int>> {};
-        numeric_input.part_2 = input.part_2;
+        numeric_input.part = input.part;
 
         std::transform(input.data.begin(), input.data.end(), std::back_inserter(numeric_input.data),
                        [](const std::string& n) { return std::stoi(n); } );

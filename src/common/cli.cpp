@@ -22,12 +22,12 @@ CLIInput<std::vector<std::string>> parse_input_file_lines(int argc, char *argv[]
         }
         else {
             input_filename = argv[2];
-            result.part_2 = true;
+            result.part = Part::TWO;
         }
     }
     else {  // argc == 2
         input_filename = argv[1];
-        result.part_2 = false;
+        result.part = Part::ONE;
     }
 
     std::ifstream input_file(input_filename);

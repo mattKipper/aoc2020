@@ -7,9 +7,14 @@
 #include <iostream>
 #include <exception>
 
+enum class Part {
+    ONE,
+    TWO
+};
+
 template<typename Input>
 struct CLIInput {
-    bool part_2;
+    Part part;
     Input data;
 };
 
