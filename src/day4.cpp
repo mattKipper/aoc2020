@@ -66,9 +66,9 @@ bool valid_passport_id(const std::string& id) {
 }
 
 static const std::unordered_map<std::string, std::function<bool(const std::string&)>> validators {
-    { "byr",  [](const std::string& byr) { return valid_year(byr, 1920, 2002); } },
-    { "iyr",  [](const std::string& byr) { return valid_year(byr, 2010, 2020); } },
-    { "eyr",  [](const std::string& byr) { return valid_year(byr, 2020, 2030); } },
+    { "byr",  [](const std::string& birth_year) { return valid_year(birth_year, 1920, 2002); } },
+    { "iyr",  [](const std::string& issue_year) { return valid_year(issue_year, 2010, 2020); } },
+    { "eyr",  [](const std::string& expiry_year) { return valid_year(expiry_year, 2020, 2030); } },
     { "hgt", valid_height },
     { "hcl", valid_hair_colour },
     { "ecl", valid_eye_colour },
