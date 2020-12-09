@@ -57,16 +57,12 @@ int solve_puzzle(const CLIInput<std::vector<int>>& input) {
 }
 
 int main(int argc, char *argv[]) {
-    auto parse_input_nums = [](int argc, char *argv[]) -> CLIInput<std::vector<int>> {
-        auto input = parse_input_file_lines(argc, argv);
+    auto from_str = [](const std::string& s) {
+        return std::stoi(s);
+    };
 
-        auto numeric_input = CLIInput<std::vector<int>> {};
-        numeric_input.part = input.part;
-
-        std::transform(input.data.begin(), input.data.end(), std::back_inserter(numeric_input.data),
-                       [](const std::string& n) { return std::stoi(n); } );
-
-        return numeric_input;
+    auto parse_input_nums = [from_str](int argc, char *argv[]) {
+        return parse_input<int>(argc, argv, from_str);
     };
 
     return solve_cli<std::vector<int>,int>(argc, argv, parse_input_nums, solve_puzzle);

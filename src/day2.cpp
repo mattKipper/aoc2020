@@ -46,17 +46,8 @@ unsigned solve_puzzle(const CLIInput<std::vector<Input>>& input) {
 }
 
 int main(int argc, char *argv[]) {
-    auto parse_inputs = [](int argc, char *argv[]) -> CLIInput<std::vector<Input>> {
-        auto raw_input = parse_input_file_lines(argc, argv);
-        auto parsed = CLIInput<std::vector<Input>> {};
-        parsed.part = raw_input.part;
-
-        std::transform(raw_input.data.begin(), raw_input.data.end(), std::back_inserter(parsed.data),
-                       [](const std::string& s) { return from_line(s); });
-
-        return parsed;
+    auto parse_input_passwords = [](int argc, char *argv[]) {
+        return parse_input<Input>(argc, argv, from_line);
     };
-
-    return solve_cli<std::vector<Input>,unsigned>(argc, argv, parse_inputs, solve_puzzle);
-
+    return solve_cli<std::vector<Input>,unsigned>(argc, argv, parse_input_passwords, solve_puzzle);
 }

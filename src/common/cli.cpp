@@ -1,43 +1,30 @@
 #include "cli.h"
 
-#include <sstream>
-#include <fstream>
-#include <iostream>
 
-CLIInput<std::vector<std::string>> parse_input_file_lines(int argc, char *argv[]) {
-
-    CLIInput<std::vector<std::string>> result;
-
-    char* input_filename;
+CLIInput<std::string> parse_arguments(int argc, char *argv[]) {
+    CLIInput<std::string> args;
 
     if (argc > 3) {
         throw std::invalid_argument("Too many arguments provided.");
-    }
-    else if (argc < 2) {
+    } else if (argc < 2) {
         throw std::invalid_argument("At least one argument must be provided.");
-    }
-    else if (argc == 3) {
+    } else if (argc == 3) {
         if (std::string(argv[1]) != "-2") {
             throw std::invalid_argument("Only supported flag is '-2' for part 2 of puzzle.");
+        } else {
+            args.data = argv[2];
+            args.part = Part::TWO;
         }
-        else {
-            input_filename = argv[2];
-            result.part = Part::TWO;
-        }
-    }
-    else {  // argc == 2
-        input_filename = argv[1];
-        result.part = Part::ONE;
+    } else {  // argc == 2
+        args.data = argv[1];
+        args.part = Part::ONE;
     }
 
-    std::ifstream input_file(input_filename);
-    std::string line;
+    return args;
+}
 
-    while (std::getline(input_file, line)) {
-        result.data.push_back(line);
-    }
-
-    return result;
+CLIInput<std::vector<std::string>> parse_input(int argc, char *argv[]) {
+    return parse_input<std::string>(argc, argv, [](const std::string& s) { return s; });
 }
 
 

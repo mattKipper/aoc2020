@@ -27,9 +27,11 @@ unsigned solve_puzzle(const CLIInput<std::vector<std::string>>& input) {
                    solve_slope(input.data, 1, 5) *
                    solve_slope(input.data, 1, 7) *
                    solve_slope(input.data, 2, 1);
+        default:
+            return -1;
     }
 }
 
 int main(int argc, char *argv[]) {
-    return solve_cli<std::vector<std::string>,unsigned>(argc, argv, parse_input_file_lines, solve_puzzle);
+    return solve_cli<std::vector<std::string>,unsigned>(argc, argv, parse_input, solve_puzzle);
 }

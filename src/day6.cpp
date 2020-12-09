@@ -80,6 +80,6 @@ int solve_puzzle(const CLIInput<std::vector<std::string>>& input) {
 }
 
 int main(int argc, char *argv[]) {
-    return solve_cli<std::vector<std::string>,int>(argc, argv, parse_input_file_lines, solve_puzzle);
+    return solve_cli<std::vector<std::string>,int>(argc, argv, parse_input, solve_puzzle);
 }
 
