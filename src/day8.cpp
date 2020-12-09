@@ -51,50 +51,75 @@ struct Machine {
     std::vector<MonitoredInstruction> program;
     std::vector<MonitoredInstruction>::iterator pc;
 
-   explicit Machine(const std::vector<Instruction>& prog):
-        acc(0) {
-        for (const auto& instruction: prog) {
-            program.emplace_back(MonitoredInstruction(instruction));
-        }
-        pc = program.begin();
+    explicit Machine(const std::vector<Instruction>& prog):
+         acc(0) {
+         for (const auto& instruction: prog) {
+             program.emplace_back(MonitoredInstruction(instruction));
+         }
+         pc = program.begin();
     }
 
-    void eval() {
-       if (pc != program.end()) {
-           pc->evaluated = true;
-           switch (pc->instruction.op) {
-               case Opcode::ACC:
-                   acc += pc->instruction.argument;
-                   ++pc;
-                   break;
-               case Opcode::JMP:
-                   pc += pc->instruction.argument;
-                   break;
-               case Opcode::NOP:
-                   ++pc;
-                   break;
-               default:
-                   break;
-           }
-       }
-   }
+    Machine() = delete;
 
-   bool has_terminated() const {
-       return pc == program.cend();
-   }
+     void eval() {
+        if (pc != program.end()) {
+            pc->evaluated = true;
+            switch (pc->instruction.op) {
+                case Opcode::ACC:
+                    acc += pc->instruction.argument;
+                    ++pc;
+                    break;
+                case Opcode::JMP:
+                    pc += pc->instruction.argument;
+                    break;
+                case Opcode::NOP:
+                    ++pc;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
 
-   bool has_looped() const {
-       return pc != program.end() && pc->evaluated;
-   }
+    void reset() {
+         pc = program.begin();
+         acc = 0;
+     }
+
+    bool has_terminated() const {
+        return pc == program.cend();
+    }
+
+    bool has_looped() const {
+        return pc != program.end() && pc->evaluated;
+    }
 };
 
 
 int solve_puzzle(const CLIInput<std::vector<Instruction>>& input) {
-    Machine mach(input.data);
-    while(!mach.has_looped()) {
-        mach.eval();
+    if (input.part == Part::ONE) {
+        Machine mach(input.data);
+        while (!mach.has_looped()) {
+            mach.eval();
+        }
+        return mach.acc;
     }
-    return mach.acc;
+    else {
+        for (auto i = 0; i < input.data.size(); ++i) {
+            Machine mach(input.data);
+            Opcode& op = mach.program[i].instruction.op;
+            if (op == Opcode::JMP || op == Opcode::NOP) {
+                op = (op == Opcode::JMP) ? Opcode::NOP : Opcode::JMP;
+                while (!mach.has_looped() && !mach.has_terminated()) {
+                    mach.eval();
+                }
+                if (mach.has_terminated()) {
+                    return mach.acc;
+                }
+            }
+        }
+        return -1;
+    }
 }
 
 int main(int argc, char *argv[]) {
