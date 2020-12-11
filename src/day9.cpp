@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <set>
+#include <algorithm>
 
 class Queue {
 public:
@@ -42,20 +43,51 @@ private:
     std::set<long long> ord_;
 };
 
-long long solve_puzzle(const CLIInput<std::vector<long long>>& input) {
-    auto n = input.data.cbegin();
-    int len = 25;
+long long solve_part_one(const std::vector<long long>& input, int len) {
+    auto n = input.cbegin();
     Queue q(n, len);
 
     n += len;
-    while(n != input.data.cend() && q.insert_if_valid(*n)) {
+    while(n != input.cend() && q.insert_if_valid(*n)) {
         ++n;
     }
 
-    if (n == input.data.cend()) {
+    if (n == input.cend()) {
         return -1;
     }
     return *n;
+}
+
+long long solve_part_two(const std::vector<long long>& input, long long target) {
+    auto lower = input.cbegin();
+    auto upper = std::next(lower);
+
+    long long sum = *lower + *upper;
+    while (upper != input.end()) {
+        if (sum == target) {
+            return *std::max_element(lower, std::next(upper)) + *std::min_element(lower, std::next(upper));
+        }
+        else if (sum < target) {
+            ++upper;
+            sum += *upper;
+        }
+        else {
+            ++lower;
+            upper = std::next(lower);
+            sum = *lower + *upper;
+        }
+    }
+    return -1;
+}
+
+long long solve_puzzle(const CLIInput<std::vector<long long>>& input) {
+    auto part_one_solution = solve_part_one(input.data, 25);
+    if (input.part == Part::ONE) {
+        return part_one_solution;
+    }
+    else {
+        return solve_part_two(input.data, part_one_solution);
+    }
 }
 
 int main(int argc, char *argv[]) {
