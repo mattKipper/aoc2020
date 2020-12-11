@@ -57,14 +57,9 @@ int solve_puzzle(const CLIInput<std::vector<int>>& input) {
 }
 
 int main(int argc, char *argv[]) {
-    auto from_str = [](const std::string& s) {
-        return std::stoi(s);
+    auto parse_input_nums = [](int argc, char *argv[]) {
+        return parse_input<int>(argc, argv, [](const std::string& s) { return std::stoi(s); });
     };
-
-    auto parse_input_nums = [from_str](int argc, char *argv[]) {
-        return parse_input<int>(argc, argv, from_str);
-    };
-
     return solve_cli<std::vector<int>,int>(argc, argv, parse_input_nums, solve_puzzle);
 }
 
