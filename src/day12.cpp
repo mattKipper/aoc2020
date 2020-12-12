@@ -1,6 +1,7 @@
 //
 // Created by kipper on 2020-12-12.
 //
+#define _USE_MATH_DEFINES
 #include "cli.h"
 
 #include <cstring>
@@ -63,15 +64,10 @@ Direction to_right(Direction facing) {
 }
 
 int turn_count(int degrees) {
-    switch (degrees) {
-        case 90: return 1;
-        case 180: return 2;
-        case 270: return 3;
-        default: throw std::invalid_argument(std::string("Invalid degrees: ") + std::to_string(degrees));
-    }
+    return (degrees / 90) % 4;
 }
 
-Direction turn(Direction facing, std::function<Direction(Direction)> turn_fn, int degrees) {
+Direction turn(Direction facing, const std::function<Direction(Direction)>& turn_fn, int degrees) {
     const auto turns = turn_count(degrees);
     for (auto i = 0; i < turns; ++i) {
         facing = turn_fn(facing);
@@ -95,23 +91,51 @@ struct Instruction {
     Action action;
     int magnitude;
 
-    Instruction(const std::string& line) :
+    explicit Instruction(const std::string& line) :
         action(action_from_char(line[0])),
         magnitude(magnitude_from_line(line)) {}
 
     Instruction(Action act, int mag) : action(act), magnitude(mag) {}
 };
 
+float to_deg(float rad) {
+    constexpr float FACTOR = 180 / M_PI;
+    return rad * FACTOR;
+}
 
-struct Position {
-    int x;
-    int y;
+float to_rad(float deg) {
+    constexpr float FACTOR = M_PI / 180;
+    return deg * FACTOR;
+}
 
-    Position (int x, int y) : x(x), y(y) {}
+struct PolarPoint;
+struct CartesianPoint {
+    double x;
+    double y;
+    CartesianPoint (double x, double y) : x(x), y(y) {}
+    CartesianPoint(const PolarPoint& p);
 };
 
+struct PolarPoint {
+    double r;
+    double theta;
+    PolarPoint(double r, double theta) : r(r), theta(theta) {}
+    PolarPoint(const CartesianPoint& p);
+};
+
+CartesianPoint::CartesianPoint(const PolarPoint& p) {
+    auto theta_rad = to_rad(p.theta);
+    x = p.r * std::cos(theta_rad);
+    y = p.r * std::sin(theta_rad);
+}
+
+PolarPoint::PolarPoint(const CartesianPoint& p) :
+    r(std::sqrt(std::pow(p.x,2) + std::pow(p.y,2))),
+    theta(to_deg(std::atan2(p.y, p.x))) {}
+
+
 struct Ship {
-    Position position;
+    CartesianPoint position;
     Direction facing;
 
     Ship() : position(0,0), facing(Direction::EAST) {}
@@ -130,7 +154,7 @@ Action forward_action(Direction facing) {
     }
 }
 
-void move(Ship& ship, const Instruction& ins) {
+void move_part_one(Ship& ship, const Instruction& ins) {
     switch (ins.action) {
         case Action::MOVE_NORTH:
             ship.position.y += ins.magnitude;
@@ -151,17 +175,71 @@ void move(Ship& ship, const Instruction& ins) {
             ship.facing = turn_right(ship.facing, ins.magnitude);
             break;
         case Action::MOVE_FORWARD:
-            move(ship, Instruction(forward_action(ship.facing), ins.magnitude));
+            move_part_one(ship, Instruction(forward_action(ship.facing), ins.magnitude));
             break;
     }
 }
 
-int solve_puzzle(const CLIInput<std::vector<Instruction>>& input) {
+struct NavShip {
+    CartesianPoint ship;
+    CartesianPoint waypoint;
+    NavShip() : ship(0,0), waypoint(10,1) {}
+};
+
+void move_part_two(NavShip& nav, const Instruction& ins) {
+    switch (ins.action) {
+        case Action::MOVE_NORTH:
+            nav.waypoint.y += ins.magnitude;
+            break;
+        case Action::MOVE_EAST:
+            nav.waypoint.x += ins.magnitude;
+            break;
+        case Action::MOVE_SOUTH:
+            nav.waypoint.y -= ins.magnitude;
+            break;
+        case Action::MOVE_WEST:
+            nav.waypoint.x -= ins.magnitude;
+            break;
+        case Action::ROTATE_LEFT: {
+            auto waypoint_p = PolarPoint(nav.waypoint);
+            waypoint_p.theta = waypoint_p.theta + ins.magnitude;
+            nav.waypoint = CartesianPoint(waypoint_p);
+            break;
+        }
+        case Action::ROTATE_RIGHT: {
+            auto waypoint_p = PolarPoint(nav.waypoint);
+            waypoint_p.theta = waypoint_p.theta - ins.magnitude;
+            nav.waypoint = CartesianPoint(waypoint_p);
+            break;
+        }
+        case Action::MOVE_FORWARD:
+            nav.ship.x += (ins.magnitude * nav.waypoint.x);
+            nav.ship.y += (ins.magnitude * nav.waypoint.y);
+            break;
+    }
+}
+int solve_part_one(const std::vector<Instruction>& input) {
     Ship ship;
-    for (auto instruction: input.data) {
-        move(ship, instruction);
+    for (auto instruction: input) {
+        move_part_one(ship, instruction);
     }
     return std::abs(ship.position.x) + std::abs(ship.position.y);
+}
+
+int solve_part_two(const std::vector<Instruction>& input) {
+    NavShip nav;
+    for (auto instruction: input) {
+        move_part_two(nav, instruction);
+    }
+    return std::round(std::abs(nav.ship.x) + std::abs(nav.ship.y));
+}
+
+int solve_puzzle(const CLIInput<std::vector<Instruction>>& input) {
+    switch (input.part) {
+        case Part::ONE: return solve_part_one(input.data);
+        case Part::TWO: return solve_part_two(input.data);
+        default: return -1;
+    }
 }
 
 int main(int argc, char *argv[]) {
