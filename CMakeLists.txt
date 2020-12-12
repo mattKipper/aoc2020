@@ -7,7 +7,7 @@ include_directories(src/common)
 
 add_library(aoc src/common/cli.cpp)
 
-foreach(n RANGE 1 11)
+foreach(n RANGE 1 12)
     add_executable("day${n}" "src/day${n}.cpp")
     target_link_libraries("day${n}" aoc)
 endforeach()
