@@ -21,7 +21,7 @@ struct CLIInput {
 };
 
 template<typename Input, typename Result>
-int solve_cli(int argc, char *argv[], std::function<CLIInput<Input>(int, char**)> parse_input, std::function<Result(const CLIInput<Input>&)> solve) {
+int solve_cli(int argc, char *argv[], std::function<CLIInput<Input>(int, char**)> parse_input, std::function<Result(CLIInput<Input>&)> solve) {
     try {
         auto input = parse_input(argc, argv);
         auto result = solve(input);
